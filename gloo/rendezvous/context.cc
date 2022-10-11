@@ -97,11 +97,7 @@ void Context::connectFullMesh(
     auto addrBytes = pair->address().bytes();
     std::cout << "######connectFullMesh rank " << rank << "->" << i << " pair address:" << pair->address().str() << std::endl << std::flush;
     allBytes.insert(allBytes.end(), addrBytes.begin(), addrBytes.end());
-    std::cout << "########connectFullMesh rank" << rank << "'s allBytes is:" << std::endl << std::flush;
-    for (auto c: allBytes) {
-      std::cout << c << std::endl;
-    }
-    std::cout << std::endl;
+    //std::cout << "########connectFullMesh rank" << rank << "'s allBytes is:" << std::endl << std::flush;
   }
 
   std::ostringstream storeKey;
@@ -123,11 +119,6 @@ void Context::connectFullMesh(
     // Connect to other side of this pair
     auto allAddrs = store.get(key.str());
     auto addr = extractAddress(allAddrs, i);
-    std::cout << "########connectFullMesh rank " << rank << " to " << i << " connect address:" << std::endl << std::flush;
-    for (auto c: addr) {
-      std::cout << c << std::flush;
-    }
-    std::cout << std::endl;
     transportContext->getPair(i)->connect(addr);
   }
 

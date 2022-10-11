@@ -11,6 +11,7 @@
 #include <array>
 #include <algorithm>
 #include <sstream>
+#include <iostream>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -100,6 +101,7 @@ const Address& Pair::address() const {
 
 void Pair::connect(const std::vector<char>& bytes) {
   auto peer = Address(bytes);
+  std::cout << "peer's address:" << peer.str() << std::endl << std::flush;
   connect(peer);
 }
 
