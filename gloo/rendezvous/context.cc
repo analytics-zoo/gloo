@@ -10,6 +10,7 @@
 
 #include "gloo/common/logging.h"
 #include "gloo/transport/address.h"
+#include <iostream>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -47,6 +48,7 @@ void Context::connectFullMesh(
   int localRank = 0;
 
   // Get Hostname using syscall
+  std::cout << "##########in connectFullMesh" << std::endl << std::flush;
   char hostname[HOSTNAME_MAX_SIZE]; // NOLINT
   int rv = gethostname(hostname, HOSTNAME_MAX_SIZE);
   if (rv != 0) {
@@ -54,11 +56,15 @@ void Context::connectFullMesh(
   }
 
   auto localHostName = std::string(hostname);
+  // seems to be error here
+  std::cout << "###########connectFullMesh -> gethostname() ->" << localHostName << std::endl << std::flush;
   // Add global rank <> hostname pair to the Store. This store is then passed
   // to Gloo when connectFullMesh is called, where Gloo uses the global rank <>
   // hostname mapping to compute local ranks.
   std::string localKey("rank_" + std::to_string(rank));
   const std::vector<char> value(localHostName.begin(), localHostName.end());
+  // store.set(rank_0, localhost)
+  // store.set(rank_1, localhost)
   store.set(localKey, value);
 
   for (int i = 0; i < size; i++) {
@@ -74,6 +80,7 @@ void Context::connectFullMesh(
       localRank++;
     }
   }
+  std::cout << "#######connectFullMesh -> localRank() ->" << localRank << std::endl << std::flush;
 
   // Create pairs
   auto transportContext = dev->createContext(rank, size);
@@ -83,14 +90,19 @@ void Context::connectFullMesh(
       continue;
     }
 
+    // create a pair for each of the rank
+    // This will only create one pair
     auto& pair = transportContext->createPair(i);
     pair->setLocalRank(localRank);
     auto addrBytes = pair->address().bytes();
+    std::cout << "######connectFullMesh rank " << rank << "->" << i << " pair address:" << pair->address().str() << std::endl << std::flush;
     allBytes.insert(allBytes.end(), addrBytes.begin(), addrBytes.end());
+    std::cout << "########connectFullMesh rank" << rank << "'s addBytes is " << allBytes.data() << std::endl << std::flush;
   }
 
   std::ostringstream storeKey;
   storeKey << rank;
+  // This setp seems to set up my address?
   store.set(storeKey.str(), allBytes);
 
   // Connect every pair
@@ -107,6 +119,7 @@ void Context::connectFullMesh(
     // Connect to other side of this pair
     auto allAddrs = store.get(key.str());
     auto addr = extractAddress(allAddrs, i);
+    std::cout << "########connectFullMesh rank " << rank << " to " << i << " connect address:" << addr.data() << std::endl << std::flush;
     transportContext->getPair(i)->connect(addr);
   }
 

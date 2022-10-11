@@ -191,6 +191,7 @@ const std::string sockaddrToInterfaceName(const struct attr& attr) {
   GLOO_ENFORCE(
     ifaceName != nullptr,
     "Unable to find environment variable GLOO_TCP_IFACE");
+  std::cout << "#########interface used->"<<std::string(ifaceName) << std::endl << std::flush;
   return std::string(ifaceName);
 }
 
