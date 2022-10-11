@@ -12,6 +12,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <iostream>
 
 #include "gloo/common/linux.h"
 #include "gloo/common/logging.h"
@@ -116,8 +117,16 @@ static void lookupAddrForHostname(struct attr& attr) {
     attr.ai_protocol = rp->ai_protocol;
     memcpy(&attr.ai_addr, rp->ai_addr, rp->ai_addrlen);
     attr.ai_addrlen = rp->ai_addrlen;
+    std::cout << "#####lookupAddrForHostname()->attr.ai_family:" << attr.ai_family << "\n" << std::flush;
+    std::cout << "#####lookupAddrForHostname()->attr.ai_socktype:" << attr.ai_socktype << "\n" << std::flush;
+    std::cout << "#####lookupAddrForHostname()->attr.ai_protocol:" << attr.ai_protocol<< "\n" << std::flush;
+    std::cout << "#####lookupAddrForHostname()->attr.addr.sa_family:" << rp->ai_addr ->sa_family << "\n" << std::flush;
+
     close(fd);
     break;
+  }
+  if (bind_rv != 0 || rp == nullptr) {
+    std::cout << "#######lookupAddrForHostname fails\n" << std::flush;
   }
 
   // If the final call to bind(2) failed, raise error saying so.
@@ -143,6 +152,7 @@ struct attr CreateDeviceAttr(const struct attr& src) {
   struct attr attr = src;
   if (attr.iface.size() > 0) {
     // Initialize attributes using network interface name
+    std::cout << "#####CreateDeviceAttr:iface.size()>0\n" << std::flush;
     lookupAddrForIface(attr);
   } else {
     // Initialize attributes using hostname/IP address
@@ -152,6 +162,7 @@ struct attr CreateDeviceAttr(const struct attr& src) {
       auto rv = gethostname(hostname.data(), hostname.size());
       GLOO_ENFORCE_EQ(rv, 0);
       attr.hostname = hostname.data();
+      std::cout << "######CreateDeviceAttr:gethostname->" << attr.hostname <<"\n" << std::flush;
     }
     lookupAddrForHostname(attr);
   }

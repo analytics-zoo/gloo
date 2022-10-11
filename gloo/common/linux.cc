@@ -15,6 +15,7 @@
 #include <linux/ethtool.h>
 #include <linux/sockios.h>
 #include <linux/version.h>
+#include <iostream>
 #include <net/if.h>
 #include <netinet/in.h>
 #include <string.h>
@@ -239,7 +240,9 @@ int getInterfaceSpeedByName(const std::string& ifname) {
   int rv;
   size_t len;
 
+  std::cout << "#######getInterfaceSpeedByName() before creating socket\n" << std::flush;
   sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
+  std::cout << "#######getInterfaceSpeedByName() after creating socket\n"<< std::flush;
   if (sock < 0) {
     return SPEED_UNKNOWN;
   }
