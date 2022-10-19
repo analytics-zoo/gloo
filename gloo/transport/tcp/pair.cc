@@ -173,6 +173,7 @@ void Pair::listen() {
   }
 
   rv = bind(fd, (const sockaddr*)&attr.ai_addr, attr.ai_addrlen);
+  std::cout << "#####listen()->bind address:" << Address(attr.ai_addr, attr.ai_addrlen).str() << "\n" << std::flush;
   if (rv == -1) {
     ::close(fd);
     signalAndThrowException(GLOO_ERROR_MSG("bind: ", strerror(errno)));

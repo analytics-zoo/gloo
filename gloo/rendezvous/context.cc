@@ -63,8 +63,8 @@ void Context::connectFullMesh(
   // hostname mapping to compute local ranks.
   std::string localKey("rank_" + std::to_string(rank));
   const std::vector<char> value(localHostName.begin(), localHostName.end());
-  // store.set(rank_0, localhost)
-  // store.set(rank_1, localhost)
+  //store.set(rank_1, icx-3)
+  //store.set(rank_0, icx-1)
   store.set(localKey, value);
 
   for (int i = 0; i < size; i++) {
@@ -76,6 +76,7 @@ void Context::connectFullMesh(
     auto val = store.get(key);
     auto hostName = std::string((const char*)val.data(), val.size());
 
+    // hostName is icx-1
     if (hostName == localHostName) {
       localRank++;
     }
@@ -92,6 +93,7 @@ void Context::connectFullMesh(
 
     // create a pair for each of the rank
     // This will only create one pair
+    // i == 1
     auto& pair = transportContext->createPair(i);
     pair->setLocalRank(localRank);
     auto addrBytes = pair->address().bytes();
@@ -103,6 +105,7 @@ void Context::connectFullMesh(
   std::ostringstream storeKey;
   storeKey << rank;
   // This setp seems to set up my address?
+  // store.set(1, 172.168.0.207:897)
   store.set(storeKey.str(), allBytes);
 
   // Connect every pair

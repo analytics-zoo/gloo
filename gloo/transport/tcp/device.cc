@@ -95,6 +95,7 @@ static void lookupAddrForHostname(struct attr& attr) {
   int bind_rv = 0;
   int bind_errno = 0;
   std::string bind_addr;
+  std::string final_bind;
   auto rv = getaddrinfo(attr.hostname.data(), nullptr, &hints, &result);
   GLOO_ENFORCE_NE(rv, -1);
   struct addrinfo* rp;
@@ -117,6 +118,8 @@ static void lookupAddrForHostname(struct attr& attr) {
     attr.ai_protocol = rp->ai_protocol;
     memcpy(&attr.ai_addr, rp->ai_addr, rp->ai_addrlen);
     attr.ai_addrlen = rp->ai_addrlen;
+    final_bind = Address(attr.ai_addr, attr.ai_addrlen).str();
+    std::cout << "#####lookupAddrForHostname()->bind address:" << final_bind << "\n" << std::flush;
     std::cout << "#####lookupAddrForHostname()->attr.ai_family:" << attr.ai_family << "\n" << std::flush;
     std::cout << "#####lookupAddrForHostname()->attr.ai_socktype:" << attr.ai_socktype << "\n" << std::flush;
     std::cout << "#####lookupAddrForHostname()->attr.ai_protocol:" << attr.ai_protocol<< "\n" << std::flush;
