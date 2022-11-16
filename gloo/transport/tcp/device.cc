@@ -175,41 +175,12 @@ bool isLocalhostAddr(const struct sockaddr* addr) {
 }
 
 const std::string sockaddrToInterfaceName(const struct attr& attr) {
-  struct ifaddrs* ifap;
-  std::string iface;
-  auto rv = getifaddrs(&ifap);
-  GLOO_ENFORCE_NE(rv, -1, strerror(errno));
-  auto addrIsLocalhost = isLocalhostAddr((struct sockaddr*)&attr.ai_addr);
-  struct ifaddrs *ifa;
-  for (ifa = ifap; ifa != nullptr; ifa = ifa->ifa_next) {
-    // Skip entry if ifa_addr is NULL (see getifaddrs(3))
-    if (ifa->ifa_addr == nullptr) {
-      continue;
-    }
-    if (ifa->ifa_addr->sa_family == AF_INET) {
-      auto sz = sizeof(struct sockaddr_in);
-      // Check if this interface address matches the provided address, or if
-      // this is the localhost interface and the provided address is in the
-      // localhost subnet.
-      if ((memcmp(&attr.ai_addr, ifa->ifa_addr, sz) == 0) ||
-          (addrIsLocalhost && isLocalhostAddr(ifa->ifa_addr))) {
-        iface = ifa->ifa_name;
-        break;
-      }
-    } else if (ifa->ifa_addr->sa_family == AF_INET6) {
-      auto sz = sizeof(struct sockaddr_in6);
-      if (memcmp(&attr.ai_addr, ifa->ifa_addr, sz) == 0) {
-        iface = ifa->ifa_name;
-        break;
-      }
-    }
-  }
+  char *ifaceName;
+  ifaceName = std::getenv("GLOO_TCP_IFACE");
   GLOO_ENFORCE(
-    ifa != nullptr,
-    "Unable to find interface for: ",
-    Address(attr.ai_addr).str());
-  freeifaddrs(ifap);
-  return iface;
+    ifaceName != nullptr,
+    "Unable to find environment variable GLOO_TCP_IFACE");
+  return std::string(ifaceName);
 }
 
 Device::Device(const struct attr& attr)
